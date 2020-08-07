@@ -1,6 +1,6 @@
 # Introduction
 
-This website provides a collection of tools for analysing epidemiological data:
+This [website](http://BioSS-EAT.github.io) provides a collection of tools for analysing epidemiological data:
 
 * **BICI** -- General purpose point and click software for both simulating from compartmental models as well as performing inference on individual-based and population wide data.
 
