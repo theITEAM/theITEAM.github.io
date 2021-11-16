@@ -67,6 +67,16 @@ div.help{
     height: 80%;
 	}
 	
+div.paramdef{
+  position: fixed;
+  margin: auto;
+  top: 0;
+  right: 5%;
+  bottom: 0;
+    width: 47%;
+    height: 80%;
+	}
+	
 input.br{
    position:absolute;
     margin: auto;
@@ -115,8 +125,8 @@ function addtrial()
 	
 	st = "";
 	st += "<div class='box' id='" + na + "' style='float:left; width:240px; height:"+h1+"px; margin:8px; font-size:17px;'>";
-	if(newtype=="General"){
-		st += "<div style='float:right; margin-right:10px; color:red'><a style='color:red; text-decoration:none;' href='javascript:t = 0; while(t < ntrial && triallist[t] != \""+na+"\") t++; removetrial(t);'>X</a></div>";
+	if(newtype=="User defined"){
+		st += "<div style='float:right; margin-right:10px; color:red'><a style='color:red; text-decoration:none;' href='javascript:t = 0; while(t < ntrial && triallist[t] != \""+na+"\") t++; removetrial(t);'>✖</a></div>";
 	}
 	
 	st += "<center><b style='font-size:20px' id='num"+na+"'>Group "+ntrial+"</b></center>";
@@ -245,14 +255,49 @@ function move(e,num,ty)
 
 function pr(a){ console.log(a);}
 
+function check_input()
+{
+	var NI = parseInt(ById("nseeder").value);
+	if(NI <= 0){
+		alert("# Seeder must be a positive quantity");
+		NI = 1;
+	}
+	ById("nseeder").value = NI;
+
+
+	var NS = parseInt(ById("ncontact").value);
+	if(NS <= 0){
+		alert("# Contact must be a positive quantity");
+		NS = 1;
+	}
+	ById("ncontact").value = NS;
+		
+	var nrep = parseInt(ById("nrep").value);
+	if(nrep <= 0){
+		alert("# Replicates must be a positive quantity");
+		nrep = 1;
+	}
+	ById("nrep").value = nrep;
+	
+	var kshape = ById("kshape").value;
+	if(kshape <= 0){
+		alert("Shape parameter k must be a positive quantity");
+		kshape = 1;
+	}
+	ById("kshape").value = kshape;
+}
+
 function calc()
 {
 	var t, nrep;
 
 	NI = parseInt(ById("nseeder").value);
+	
 	NS = parseInt(ById("ncontact").value);
+		
 	nrep = parseInt(ById("nrep").value);
-	kshape = parseInt(ById("kshape").value);
+	
+	kshape = ById("kshape").value;
 	
 	dom = parseFloat(ById("dom").value).toFixed(2);
 	ById("domval").innerHTML = dom;
@@ -294,7 +339,7 @@ function calc()
 	W = Math.log(h)*av2;
 	Weta = Math.log(h)*av2eta;
  
-    MSS = nrep*ntrial*f*NS*(HSav-xiSav*xiSav);
+  MSS = nrep*ntrial*f*NS*(HSav-xiSav*xiSav);
 	MSI = nrep*ntrial*(f*NS*(xiS2av - xiSav*xiSav) - NI*W);
 	MII = nrep*ntrial*(f*NS*(xiS2av - xiSav*xiSav) - NI*(2*W-X));
 	num = (MSS*MII-MSI*MSI)/MII;
@@ -325,6 +370,8 @@ function calc()
 	if(num <= 0) st = "?";
 	else st = (1/Math.sqrt(num)).toFixed(3);
  	ById("dom_r").innerHTML = st+ "/|<i>a<sub>r</sub></i>|";
+	
+	replot();
 }
 
 function drawcan(nam,t,ty)
@@ -521,7 +568,7 @@ function drawcan(nam,t,ty)
 
 function replot()
 {
-	if(newtype == "General"){
+	if(newtype == "User defined"){
 		var w;
 		switch(ntrial){
 		case 1: w = 280; break;
@@ -551,8 +598,9 @@ function init()
 
 function changentrial()
 {
-	ntrialnew = parseInt(ById("ntrial").value);
-
+	if(model == "SNP") ntrialnew = parseInt(ById("ntrialSNP").value);
+	else ntrialnew = parseInt(ById("ntrialVAC").value);
+ 
 	if(isNaN(ntrialnew)){ alert("Not a number!");}
 	else{
 		if(ntrialnew < 1 || ntrialnew > 100) alert("Not in range!");
@@ -563,7 +611,9 @@ function changentrial()
 			else{
 				while(ntrialnew < ntrial) removetrial(ntrial-1);
 			}
-			ById("ntrial").value = ntrial;
+			if(model == "SNP") ById("ntrialSNP").value = ntrial;
+			else ById("ntrialVAC").value = ntrial;
+			
 			replot();
 			calc();
 		}
@@ -613,9 +663,15 @@ function changetype()
 	if(newtype == oldtype) return;
 	oldtype = newtype;
 	
-	if(newtype == "General") ById("ntr").style.visibility = "visible";		
-	else ById("ntr").style.visibility = "hidden";
-		
+	if(newtype == "User defined"){
+		ById("ntrSNP").style.visibility = "visible";		
+		ById("ntrVAC").style.visibility = "visible";		
+	}
+	else{
+		ById("ntrSNP").style.visibility = "hidden";
+		ById("ntrVAC").style.visibility = "hidden";
+	}
+	
 	ById("list").innerHTML = "";
 	ntrial = 0;	
 	triallist.length=0; phiBBseedlist.length=0; phiABseedlist.length=0; phiBBcontlist.length=0; phiABcontlist.length=0;
@@ -690,7 +746,7 @@ function changetype()
 		phiBBseedlist[2]=1; phiABseedlist[2]=0; phiBBcontlist[2]=0.78; phiABcontlist[2]=0.11;
 		break;
 
-	case "General":
+	case "User defined":
 		ById("wrap").style.width = "800px";
 		
 		ById("nseeder").value = 2;
@@ -703,7 +759,8 @@ function changetype()
 	}
 	
 		
-	ById("ntrial").value = ntrial;
+	if(model == "SNP") ById("ntrialSNP").value = ntrial;
+	else ById("ntrialVAC").value = ntrial;
 	
 	replot();
 	calc();
@@ -783,6 +840,19 @@ function  helpoff()
 	ById('shad').style.visibility= 'hidden'; ById('help').style.visibility= 'hidden';
 }
 
+
+function  paramdefon()
+{
+	ById('shad').style.visibility= 'visible'; ById('paramdef').style.visibility= 'visible';
+}
+
+function  paramdefoff()
+{
+	ById('shad').style.visibility= 'hidden'; ById('paramdef').style.visibility= 'hidden';
+}
+
+
+
 function recal()
 {
 	NI = parseInt(ById("nseeder").value);
@@ -804,9 +874,13 @@ function ById(a){ return  document.getElementById(a);}
 </head>
 
 <body onload="init();">
-<img src="SIREPClogo.png" width=653 height=67 /><br/>
+<img src="SIREPClogo.png" height=90 />
+<br/>
 <div style="width:850px; margin-top:10px; margin-bottom:0px;">
-This calculator tool estimates precisions for SNP or vaccination-based effects that alter individual susceptibility, infectivity and/or recoverability using infection and recovery time data from a disease transmission experiment. For further details please click <a href="javascript:helpon();">here</a>.
+This calculator tool estimates precisions for SNP or vaccination-based effects that alter individual susceptibility, infectivity and/or recoverability using infection and recovery time data from a disease transmission experiment.
+</div>
+<div style="width:850px; margin-top:10px; margin-bottom:0px;">
+For further details please click <a href="javascript:helpon();">here</a> and for parameter definitions  <a href="javascript:paramdefon();">here</a>.
 </div>
 <br/> 
 
@@ -814,7 +888,7 @@ This calculator tool estimates precisions for SNP or vaccination-based effects t
  
  
  
-<div id='input_box' class='boxgreen' style='position:absolute; left:10px; top:125px; width:270px; height:415px; margin:8px; font-size:17px;'>
+<div id='input_box' class='boxgreen' style='position:absolute; left:10px; top:185px; width:270px; height:415px; margin:8px; font-size:17px;'>
 <center><b style='font-size:20px'>INPUTS</b></center>
  <b style='font-size:12px; margin:0px;padding:0px'>EFFECTS:</b> <br>
 	<form name="formMOD" onsubmit="return false" style="margin-top:1px; margin-bottom:8px;" onchange="changemodel();">
@@ -826,59 +900,59 @@ This calculator tool estimates precisions for SNP or vaccination-based effects t
  
 <form name="formSNP"  onsubmit="return false" style="margin-top:0px; margin-bottom:8px;" onchange="changetype();">
  <input type="radio" name="type" value="Single"> Single group (w/o dominance) <br>
- <input type="radio" name="type" value="Pure"> Pure desgin (w/o dominance)<br>
+ <input type="radio" name="type" value="Pure"> Pure design (w/o dominance)<br>
  <input type="radio" name="type" value="Puredom"> Pure design (with dominance)<br>
  <input type="radio" name="type" value="Mixed" > Mixed design (w/o dominance)<br>
  <input type="radio" name="type" value="Mixeddom" > Mixed design (with dominance) <br>
- <input type="radio" name="type" value="General"> General <span id="ntr" style="visibility:hidden"> - # Groups: <input  type="number" style="width:50px; margin-right:30px" id="ntrial" value="1" step="1" min="1" max="100" onchange="changentrial()"></span>
+ <input type="radio" name="type" value="User defined"> User defined <span id="ntrSNP" style="visibility:hidden"> - Groups: <input  type="number" style="width:40px; margin-right:10px" id="ntrialSNP" value="1" step="1" min="1" max="100" onchange="check_input(); changentrial()"></span>
 </form>
 
 <form name="formVAC"  onsubmit="return false" style="display:none; margin-top:8px; margin-bottom:0px;" onchange="changetype();">
  <input type="radio" name="type" value="Single"> Single group<br>
  <input type="radio" name="type" value="Pure"> Pure design<br>
  <input type="radio" name="type" value="Mixed"> Mixed design<br>
- <input type="radio" name="type" value="General"> General <span id="ntr" style="visibility:hidden"> - # Groups: <input  type="number" style="width:50px; margin-right:30px" id="ntrial" value="1" step="1" min="1" max="100" onchange="changentrial()"></span>
+ <input type="radio" name="type" value="User defined"> User defined <span id="ntrVAC" style="visibility:hidden"> - Groups: <input  type="number" style="width:40px; margin-right:3px" id="ntrialVAC" value="1" step="1" min="1" max="100" onchange="changentrial()"></span>
 </form>
 
  <b style='font-size:12px; margin:0px;padding:0px'>DETAILS:</b> <br>
 <table>
 <tr>
-<td># Seeders per group:</td><td><input type="number" style="width:50px; margin-right:30px;" id="nseeder" value=1 step="1" min="1" max="1000" onchange="replot(); calc();"></td>
+<td style="vertical-align:top"># Seeders per group:</td><td style="vertical-align:top"><input type="number" style="width:50px; margin-right:30px;" id="nseeder" value=1 step="1" min="1" max="1000" onchange="check_input(); replot(); calc();"></td>
 </tr>
 <tr>
-<td># Contacts per group:</td><td> <input type="number" style="width:50px; margin-right:30px" id="ncontact" value = 10 step="1" min="1" max="1000" onchange="replot(); calc();"></td>
+<td style="vertical-align:top"># Contacts per group:</td><td style="vertical-align:top"> <input type="number" style="width:50px; margin-right:30px" id="ncontact" value = 10 step="1" min="1" max="1000" onchange="check_input(); replot(); calc();"></td>
 </tr>
 <tr>
-<td># Replicates:</td><td> <input type="number" style="width:50px; margin-right:30px" id="nrep" value = 1 step="1" min="1" max="100" onchange="calc();"></td>
+<td style="vertical-align:top"># Replicates:</td><td style="vertical-align:top"> <input type="number" style="width:50px; margin-right:30px" id="nrep" value = 1 step="1" min="1" max="100" onchange="check_input(); calc();"></td>
 </tr>
 <tr>
-<td>Shape parameter <i>k</i>:</td><td> <input type="number" style="width:50px; margin-right:30px" id="kshape" value = 5 step="1" min="1" onchange="calc();"></td>
+<td style="vertical-align:top">Shape parameter <i>k</i>:</td><td style="vertical-align:top"> <input type="number" style="width:50px; margin-right:30px" id="kshape" value = 5 step="1" min="1" onchange="check_input(); calc();"></td>
 </tr>
 <tr>
-<td>% Infected <i>&straightphi;</i>:<span style='font-size:16px' id='percontinf'></span> </td><td> &nbsp;<input id='frac' type='range'  style="width:100px; height:20px; margin:0px; padding:0px; margin-left:0px;" min='1' max = '100' step = '1' onmouseup='calc()' oninput='calc()' value = 100></td>
+<td style="vertical-align:top">% Infected <i>&straightphi;</i>:<span style='font-size:16px' id='percontinf'></span> </td><td style="vertical-align:top"> &nbsp;<input id='frac' type='range'  style="width:100px; height:20px; margin:0px; padding:0px; margin-left:0px;" min='1' max = '100' step = '1' onmouseup='calc()' oninput='calc()' value = 100></td>
 </tr>
 <tr id="dom_show">
-<td>Dominance: <span style='font-size:16px' id='domval'></span>   </td><td>  <span style='color:red;'><b>A</b></span><input id='dom' type='range' style="width:70px; height:20px; margin:0px; padding:0px; margin-left:5px;  margin-right:5px;" min='-1' max = '1' step = 0.1 onmouseup='replot(); calc();' oninput='replot(); calc()' value = 0><span style='color:blue;'><b>B</b></span></td>
+<td style="vertical-align:top">Dominance: <span style='font-size:16px' id='domval'></span>   </td><td style="vertical-align:top">  <span style='color:red;'><b>A</b></span><input id='dom' type='range' style="width:70px; height:20px; margin:0px; padding:0px; margin-left:5px;  margin-right:5px;" min='-1' max = '1' step = 0.1 onmouseup='replot(); calc();' oninput='replot(); calc()' value = 0><span style='color:blue;'><b>B</b></span></td>
 </tr>
 </table>
 </div>
 
-<div id="output_box" class='boxred' style='position:absolute; left:610px; top:125px; width:270px; height:230px; margin:8px; font-size:17px;'>
-<center><b style='font-size:20px'>OUTPUTS</b></center>
+<div id="output_box" class='boxred' style='position:absolute; left:610px; top:185px; width:270px; height:230px; margin:8px; font-size:17px;'>
+<center><b style='font-size:20px, font-family:Arial'>OUTPUTS</b></center>
 <table>
-<tr><td width = 150><i>N<sub>total</sub></i> = <span id="Nexp"></span></td><td width = 110>Individuals</td></tr>
-<tr><td>SD in <i>a<sub>g</sub></i> = <span id="sig_g"></span></td><td>(Susceptibility)</td></tr>
-<tr><td>SD in <i>a<sub>f</sub></i>  = <span id="sig_f"></span></td><td>(Infectivity)</td></tr>
-<tr><td>SD in <i>a<sub>r</sub></i>  = <span id="sig_r"></span></td><td>(Recovery)</td></tr>
-<tr id="dom_g_show"><td>SD in &Delta;<i><sub>g</sub></i> = <span id="dom_g"></span></td><td>(Dom. in Susc.)</td></tr>
-<tr id="dom_f_show"><td>SD in &Delta;<i><sub>f</sub></i>  = <span id="dom_f"></span></td><td>(Dom. in Inf.)</td></tr>
-<tr id="dom_r_show"><td>SD in &Delta;<i><sub>r</sub></i>  = <span id="dom_r"></span></td><td>(Dom. in Rec.)</td></tr>
+<tr><td width = 150><i style="font-family:Arial">N<sub>total</sub></i> = <span id="Nexp"></span></td><td width = 110>Individuals</td></tr>
+<tr><td style="vertical-align:top">SD in <i>a<sub>g</sub></i> = <span id="sig_g"></span></td><td style="vertical-align:top">(Susceptibility)</td></tr>
+<tr><td style="vertical-align:top">SD in <i>a<sub>f</sub></i>  = <span id="sig_f"></span></td><td style="vertical-align:top">(Infectivity)</td></tr>
+<tr><td style="vertical-align:top">SD in <i>a<sub>r</sub></i>  = <span id="sig_r"></span></td><td style="vertical-align:top">(Recovery)</td></tr>
+<tr id="dom_g_show"><td style="vertical-align:top">SD in &Delta;<i><sub>g</sub></i> = <span id="dom_g"></span></td><td style="vertical-align:top">(Dom. in Susc.)</td></tr>
+<tr id="dom_f_show"><td style="vertical-align:top">SD in &Delta;<i><sub>f</sub></i>  = <span id="dom_f"></span></td><td style="vertical-align:top">(Dom. in Inf.)</td></tr>
+<tr id="dom_r_show"><td style="vertical-align:top">SD in &Delta;<i><sub>r</sub></i>  = <span id="dom_r"></span></td><td style="vertical-align:top">(Dom. in Rec.)</td></tr>
 </table>
 
 </div>
 </div>
 
-<div id="wrap" style="position:absolute; left:310px; top:125px; height:50px; ">
+<div id="wrap" style="position:absolute; left:310px; top:185px; height:50px; ">
 <span id="list"></span>
 </div>
 
@@ -886,9 +960,9 @@ This calculator tool estimates precisions for SNP or vaccination-based effects t
 <div class ="inp" id="inp" style=" background:#ffffff; visibility:hidden; padding:20px">
 <center> <b>Number of <span id="overcat"></span> in group <span id="trialnum"></span>:</b><br/><br/>
 <table>
-<tr><td>N<sub>AA</sub></td><td>=</td><td><input onchange="recal()" id="NAA" type="number" style="width:150px;"/><td></tr>
-<tr><td>N<sub>BB</sub></td><td>=</td><td><input onchange="recal()" id="NBB" type="number" style="width:150px;"/><td></tr>
-<tr><td>N<sub>AB</sub></td><td>=</td><td><span  id="NAB" type="number" style="width:150px;"></span><td></tr>
+<tr><td style="vertical-align:top">N<sub>AA</sub></td><td style="vertical-align:top">=</td><td style="vertical-align:top"><input onchange="recal()" id="NAA" type="number" style="width:150px;"/><td style="vertical-align:top"></tr>
+<tr><td style="vertical-align:top">N<sub>BB</sub></td><td style="vertical-align:top">=</td><td style="vertical-align:top"><input onchange="recal()" id="NBB" type="number" style="width:150px;"/><td style="vertical-align:top"></tr>
+<tr><td style="vertical-align:top">N<sub>AB</sub></td><td style="vertical-align:top">=</td><td style="vertical-align:top"><span  id="NAB" type="number" style="width:150px;"></span><td style="vertical-align:top"></tr>
 </table>
 <br/>
  <input id="number" type="button" value="OK" onclick="inputoff(1);"" style="width:100px; float:right;"/>
@@ -898,9 +972,9 @@ This calculator tool estimates precisions for SNP or vaccination-based effects t
 
 <div class ="help" id="help" style=" background:#ffffff; visibility:hidden; padding:20px;  ">
 <i style="font-size:25px;">Help</i>
-<div class="close" style='color:red; width:30px;'><a style='color:red; text-decoration:none;' href='javascript: helpoff();'>X</a></div>
+<div class="close" style='color:red; width:30px;'><a style='color:red; text-decoration:none;' href='javascript: helpoff();'>✖</a></div>
 
-<div class="inside" style="overflow:scroll; height:90%">
+<div class="inside" style="overflow:scroll; height:85%; margin-top:10px">
 
 <h2>What are SNP and vaccination effects? </h2>
 <p> Vaccinations are known to be an effective way to reduce the probability of becoming infected, however they will not protect every individual. Furthermore, once infected a vaccinated individual may be less likely to transmit the disease and/or recover faster. Understanding these mechanisms is crucial to estimating the effectiveness of a vaccination campaign. We define vaccination "effects" as the average difference in three key epidemiological traits between the vaccinated and unvaccinated groups: susceptibility, infectivity and recoverability.
@@ -940,9 +1014,13 @@ A key question to ask is how should the experiment be best designed in order to 
  </p>
  
  <p>
- The next option selects the experimental design to be carried out. These include the five potential designs outlined in the paper: "Single group (without dominance)", "Pure design (without dominance)", "Pure design (with dominance)", "Mixed design (without dominance)" and "Mixed design (with dominance)". Selecting "General" allows the user to set an arbitrary design.
+ The next option selects the experimental design to be carried out. These include the five potential designs outlined in the paper: "Single group (without dominance)", "Pure design (without dominance)", "Pure design (with dominance)", "Mixed design (without dominance)" and "Mixed design (with dominance)".
  </p>
  
+<p>
+ Selecting "User defined" allows the user to set an arbitrary design. Here the number of groups can be altered by entering the relevant number in the box (also groups can be removed by clicking on the "x" symbols in the corner).
+</p>
+
  <p>The number of seeders and contacts refers to the number of individuals initially infected and susceptible in each contact group. The genetic compositions of these subpopulations is shown by the panels on the right (one for each contact group). Here <i>N<sub>AA</sub></i>, <i>N<sub>BB</sub></i> and <i>N<sub>AB</sub></i> refer to the number of individuals in each of the three genotypes. These genetic compositions may be changed by either clicking on the numbers themselves, or by dragging the purple circles within the triangle plots.  
  </p>
  
@@ -983,7 +1061,13 @@ This also means that dominance does not need to be considered, and so experiment
 
 <h3>General application</h3>
 <p>
-It is important to note that the estimates provided by this tool represent lower bounds on the actual standard deviations of model parameters. As shown in the "Realistic model and data scenarios" section of the paper, residual contributions, group and fixed effects and incomplete data will all act to increase these standard deviations, and so reduce the statistical power with which SNP and vaccination-based associations can be made.
+Two important points need to be made when considering the general application of the power calculations presented here:
+</p>
+<p>
+<b>•</b> It is assumed that individuals are randomly distributed regarding the effects of other SNPs on the 3 parameters. In particular, it is assumed that related individuals are randomly distributed across groups.
+</p>
+<p>
+<b>•</b> The estimates provided by this tool represent lower bounds on the actual standard deviations of model parameters. As shown in the "Realistic model and data scenarios" section of the paper, residual contributions, group and fixed effects and incomplete data will all act to increase these standard deviations, and so reduce the statistical power with which SNP and vaccination-based associations can be made.
  </p>
  </div>
  
@@ -991,6 +1075,90 @@ It is important to note that the estimates provided by this tool represent lower
   <input class="br" id="number" type="button" value="OK" onclick="helpoff();"" style="width:100px;"/>
 
 </div>
+
+<div class ="paramdef" id="paramdef" style=" background:#ffffff; visibility:hidden; padding:20px;  ">
+<i style="font-size:25px;">Definitions</i>
+<div class="close" style='color:red; width:30px;'><a style='color:red; text-decoration:none;' href='javascript: paramdefoff();'>✖</a></div>
+
+<div class="inside" style="overflow:scroll; height:85%; margin-top:10px">
+
+<table style="vertical-align:top">
+<tr><td style="vertical-align:top"><b>SNP</b></td><td width=30></td><td style="vertical-align:top">Single nucleotide polymorphism</td></tr>
+<tr style="height:5px"></tr>
+<tr><td style="vertical-align:top"><b>Seeder</b></td><td width=30></td><td style="vertical-align:top">Initially infected individual</td></tr>
+<tr style="height:5px"></tr>
+<tr><td style="vertical-align:top"><b>Contact</b></td><td width=30></td><td style="vertical-align:top">Initially susceptible individual</td></tr>
+<tr style="height:5px"></tr>
+<tr><td style="vertical-align:top"><b>Dominance </b></td><td width=30></td><td style="vertical-align:top">The degree to which one allele (dominant) masks the phenotypic contribution of the other (recessive)</td></tr>
+<tr style="height:5px"></tr>
+<tr><td style="vertical-align:top"><b>Replicates</b></td><td width=30></td><td style="vertical-align:top">Number of times an experimental design is copied (to increase statistical power)</td></tr>
+<tr style="height:5px"></tr>
+
+<tr><td style="vertical-align:top"><b style="font-family:arial"><i>N<sub>AA</sub></i></b></td><td width=30></td><td style="vertical-align:top">Number of individuals with SNP genotype <i>AA</i></td></tr>
+<tr style="height:5px"></tr>
+<tr><td style="vertical-align:top"><b style="font-family:arial"><i>N<sub>AB</sub></i></b></td><td width=30></td><td style="vertical-align:top">Number of individuals with SNP genotype <i>AB</i></td></tr>
+<tr style="height:5px"></tr>
+<tr><td style="vertical-align:top"><b style="font-family:arial"><i>N<sub>BB</sub></i></b></td><td width=30></td><td style="vertical-align:top">Number of individuals with SNP genotype <i>BB</i></td></tr>
+<tr style="height:5px"></tr>
+<tr><td style="vertical-align:top"><b style="font-family:arial"><i>N<sub>vac</sub></i></b></td><td width=30></td><td style="vertical-align:top">Number of vaccinated individuals</td></tr>
+<tr style="height:5px"></tr>
+<tr><td style="vertical-align:top"><b style="font-family:arial"><i>N<sub>unvac</sub></i></b></td><td width=30></td><td style="vertical-align:top">Number of unvaccinated individuals</td></tr>
+<tr style="height:5px"></tr>
+<tr><td style="vertical-align:top"><b style="font-family:arial"><i>N<sub>total</sub></i></b></td><td width=30></td><td style="vertical-align:top">The total number of individuals in the disease transmission experiment</td></tr>
+
+<tr style="height:5px"></tr>
+
+<tr><td style="vertical-align:top"><b style="font-family:times"><i>k</i></b></td><td width=30></td><td style="vertical-align:top">Shape parameter that determines distribution in infectious duration (assumed gamma distributed)</td></tr>
+<tr style="height:5px"></tr>
+<tr><td style="vertical-align:top"><b style="font-family:times"><i>ϕ</i></b></td><td width=30></td><td style="vertical-align:top">Fraction of contacts assumed to be infected</td></tr>
+
+
+<tr style="height:5px"></tr>
+<tr><td style="vertical-align:top"><b style="font-family:times"><i>χ</i></b></td><td width=30></td><td style="vertical-align:top">Homozygote balance - the proportion of <i>AA</i> individuals minus the proportion of <i>BB</i> individuals</td></tr>
+
+<tr style="height:5px"></tr>
+<tr><td style="vertical-align:top"><b style="font-family:times"><i>H</i></b></td><td width=30></td><td style="vertical-align:top">Homozygosity - the proportion of <i>AA</i> individuals plus the proportion of <i>BB</i> individuals</td></tr>
+
+<tr style="height:5px"></tr>
+<tr><td style="vertical-align:top"><b style="font-family:times"><i>a<sub>g</sub></i></b></td><td width=30></td><td style="vertical-align:top">SNP effect for susceptibility - half the fractional change comparing the <i>AA</i> and <i>BB</i> genotypes (or unvaccinated/vaccinated)</td></tr>
+
+<tr><td style="vertical-align:top"><b style="font-family:times"><i>a<sub>f</sub></i></b></td><td width=30></td><td style="vertical-align:top">SNP effect for infectivity - half the fractional change comparing the <i>AA</i> and <i>BB</i> genotypes (or unvaccinated/vaccinated)</td></tr>
+
+<tr><td style="vertical-align:top"><b style="font-family:times"><i>a<sub>r</sub></i></b></td><td width=30></td><td style="vertical-align:top">SNP effect for recoverability - half the fractional change comparing the <i>AA</i> and <i>BB</i> genotypes (or unvaccinated/vaccinated)</td></tr>
+
+<tr><td style="vertical-align:top"><b style="font-family:times">SD in <i>a<sub>g</sub></i></b></td><td width=30></td><td style="vertical-align:top">Expected standard deviation in the posterior distribution for <i>a<sub>g</sub></i> - see below for interpretation</td></tr>
+
+<tr><td style="vertical-align:top"><b style="font-family:times">SD in <i>a<sub>f</sub></i></b></td><td width=30></td><td style="vertical-align:top">Expected standard deviation in the posterior distribution for <i>a<sub>f</sub></i> - see below for interpretation</td></tr>
+
+<tr><td style="vertical-align:top"><b style="font-family:times">SD in <i>a<sub>r</sub></i></b></td><td width=30></td><td style="vertical-align:top">Expected standard deviation in the posterior distribution for <i>a<sub>r</sub></i>  - see below for interpretation</td></tr>
+
+
+<tr style="height:5px"></tr>
+<tr><td style="vertical-align:top"><b style="font-family:times">Δ<sub>g</sub></b></td><td width=30></td><td style="vertical-align:top">Susceptibility effect scaled dominance factor (1 = <i>A</i> is completely dominant over <i>B</i>, -1 = <i>B</i> is dominant over <i>A</i>, 0 = no dominance)</td></tr>
+
+<tr style="height:5px"></tr>
+<tr><td style="vertical-align:top"><b style="font-family:times">Δ<sub>f</sub></b></td><td width=30></td><td style="vertical-align:top">Infectivity effect scaled dominance factor (1 = <i>A</i> is completely dominant over <i>B</i>, -1 = <i>B</i> is dominant over <i>A</i>, 0 = no dominance)</td></tr>
+<tr style="height:5px"></tr>
+<tr><td style="vertical-align:top"><b style="font-family:times">Δ<sub>r</sub></b></td><td width=30></td><td style="vertical-align:top">Recoverability effect scaled dominance factor (1 = <i>A</i> is completely dominant over <i>B</i>, -1 = <i>B</i> is dominant over <i>A</i>, 0 = no dominance)</td></tr>
+
+<tr style="height:5px"></tr>
+<tr><td style="vertical-align:top"><b style="font-family:times">SD in <i>Δ<sub>g</sub></i></b></td><td width=30></td><td style="vertical-align:top">Expected standard deviation in the posterior distribution for <i>Δ<sub>g</sub></i></td></tr>
+
+<tr style="height:5px"></tr>
+<tr><td style="vertical-align:top"><b style="font-family:times">SD in <i>Δ<sub>f</sub></i></b></td><td width=30></td><td style="vertical-align:top">Expected standard deviation in the posterior distribution for <i>Δ<sub>f</sub></i></td></tr>
+
+<tr style="height:5px"></tr>
+<tr><td style="vertical-align:top"><b style="font-family:times">SD in <i>Δ<sub>r</sub></i></b></td><td width=30></td><td style="vertical-align:top">Expected standard deviation in the posterior distribution for <i>Δ<sub>r</sub></i></td></tr>
+
+
+</table>
+<p>
+<b>Interpretation </b> - Quantities giving standard deviations in effect sizes (i.e. SD in <i>a<sub>g</sub></i> /  <i>a<sub>f</sub></i> /  <i>a<sub>r</sub></i>) provide an indication of what size of effect could potentially be identified by the transmission experiment. For example a value "SD in <i>a<sub>g</sub></i>  = 0.2" would mean that statistically significant association can be made in cases in which the <i>AA</i> and <i>BB</i> (or alternatively vaccinated/unvaccinated) individuals differ in their susceptibility by 20% or more. The experiment would likely lack the power to identify smaller effect sizes than this. (Note, this only provides a general guide and the actual statistical power actually depends on stochastic variability inherent in the epidemiological process itself).  
+</p> 
+ <input class="br" id="number" type="button" value="OK" onclick="paramdefoff();"" style="width:100px;"/>
+
+</div>
+
 
 </body>
 </html>
