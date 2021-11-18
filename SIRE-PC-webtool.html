@@ -166,7 +166,7 @@ function add_vac_box(type,na,num)
 		st += "<div style='margin-top:10px' id='"+typest+"_"+na+"'></div>";
 	}
 	else{
-		st += "<canvas onmousemove='move(event,"+num+","+type+")' onclick='if(overN >= 0) inputon();' onmousedown='butdown=1; move(event,"+num+","+type+");' onmouseup='butdown=0;' id='"+typest+"_"+na+"' width='"+dx+"' height='"+dy+"'></canvas>";
+		st += "<canvas onmousemove='if(butdown== 1) move(event,"+num+","+type+")' onclick='if(overN >= 0) inputon();' onmousedown='butdown=1; move(event,"+num+","+type+");' onmouseup='butdown=0;' id='"+typest+"_"+na+"' width='"+dx+"' height='"+dy+"' onmouseleave='butdown = 0'></canvas>";
 	}	
 		
 	return st;
@@ -218,12 +218,11 @@ function move(e,num,ty)
 	else{
 		overN = -1;
 	}
-	
+
 	if(butdown == 1){
 		phiBB = (mx-px1-(px3-px1)*(py1-my)/(py1-py3))/(px2-px1); if(phiBB < 0 && phiBB > -lim) phiBB = 0; if(phiBB > 1 && phiBB< 1+lim) phiBB = 1;
 		phiAB = (py1-my)/(py1-py3); if(phiAB < 0 && phiAB > -lim) phiAB = 0; if(phiAB > 1 && phiAB< 1+lim) phiAB = 1;
 		phiAA = 1-phiBB-phiAB;
-		
 		
 		if(phiAA < 0 && phiAA > -lim){
 			if(phiBB > phiAB) phiBB += phiAA; else phiAB += phiAA;
@@ -258,14 +257,21 @@ function pr(a){ console.log(a);}
 function check_input()
 {
 	var NI = parseInt(ById("nseeder").value);
+	if(isNaN(NI)){
+		alert("# Seeder must be a number");
+		NI = 1;
+	}
 	if(NI <= 0){
 		alert("# Seeder must be a positive quantity");
 		NI = 1;
 	}
 	ById("nseeder").value = NI;
 
-
 	var NS = parseInt(ById("ncontact").value);
+	if(isNaN(NS)){
+		alert("# Contact must be a positive integer");
+		NS = 1;
+	}
 	if(NS <= 0){
 		alert("# Contact must be a positive quantity");
 		NS = 1;
@@ -273,6 +279,10 @@ function check_input()
 	ById("ncontact").value = NS;
 		
 	var nrep = parseInt(ById("nrep").value);
+	if(isNaN(nrep)){
+		alert("# Replicates must be a positive integer");
+		nrep = 1;
+	}
 	if(nrep <= 0){
 		alert("# Replicates must be a positive quantity");
 		nrep = 1;
@@ -280,11 +290,82 @@ function check_input()
 	ById("nrep").value = nrep;
 	
 	var kshape = ById("kshape").value;
+	if(isNaN(kshape)){
+		alert("Shape parameter k must be a positive number");
+		kshape = 1;
+	}
 	if(kshape <= 0){
 		alert("Shape parameter k must be a positive quantity");
 		kshape = 1;
 	}
 	ById("kshape").value = kshape;
+	
+	var ntrSNP = parseInt(ById("ntrialSNP").value);
+	if(isNaN(ntrSNP)){ 
+		alert("Must be a number");  
+		ntrSNP = 1;
+	}
+	if(ntrSNP < 1){ 
+		alert("Must be at least one group");  
+		ntrSNP = 1;
+	}
+	ById("ntrialSNP").value = ntrSNP;
+	
+	var ntrVAC = parseInt(ById("ntrialVAC").value);
+	if(isNaN(ntrVAC)){ 
+		alert("Must be a number");  
+		ntrVAC = 1;
+	}
+	if(ntrVAC < 1){ 
+		alert("Must be at least one group");  
+		ntrVAC = 1;
+	}
+	ById("ntrialVAC").value = ntrVAC;
+	
+	
+	var ntrGWAS = parseInt(ById("ntrialGWAS").value);
+	if(isNaN(ntrGWAS)){ 
+		alert("Must be a number");  
+		ntrGWAS = 1;
+	}
+	if(ntrGWAS < 1){ 
+		alert("Must be at least one group");  
+		ntrGWAS = 1;
+	}
+	ById("ntrialGWAS").value = ntrGWAS;
+	
+	var ntrFIELD = parseInt(ById("ntrialFIELD").value);
+	if(isNaN(ntrFIELD)){ 
+		alert("Must be a number");  
+		ntrFIELD = 1;
+	}
+	if(ntrFIELD < 1){ 
+		alert("Must be at least one group");  
+		ntrFIELD = 1;
+	}
+	ById("ntrialFIELD").value = ntrFIELD;
+	
+	var p	=  parseFloat(ById("p").value);
+	if(isNaN(p)){ 
+		alert("Must be a number");  
+		p = 0.5;
+	}
+	if(p < 0 || p > 1){ 
+		alert("Must be in the range between zero and one");  
+		p = 0.5;
+	}
+	ById("p").value = p;
+	
+	var vacfreq	= parseFloat(ById("vacfreq").value);
+	if(isNaN(vacfreq)){ 
+		alert("Must be a number");  
+		vacfreq = 0.5;
+	}
+	if(vacfreq < 0 || vacfreq > 1){ 
+		alert("Must be in the range between zero and one");  
+		vacfreq = 0.5;
+	}
+	ById("vacfreq").value = vacfreq;
 }
 
 function calc()
@@ -305,12 +386,14 @@ function calc()
 	ById("percontinf").innerHTML = per;
 	f = per/100;
 	
-	ById("Nexp").innerHTML = (NI+NS)*ntrial*nrep;
-
 	h = NI/(NI+f*NS);
 
 	xiSav = 0; xiS2av = 0; HSav = 0; etaSav = 0; etaS2av = 0;
-	for(t = 0; t < ntrial; t++){ xiSav += xiS[t]; xiS2av += xiS[t]*xiS[t]; HSav += HS[t]; etaSav += etaS[t]; etaS2av += etaS[t];}
+	for(t = 0; t < ntrial; t++){ 
+		xiSav += xiS[t]; xiS2av += xiS[t]*xiS[t];
+		HSav += HS[t];
+		etaSav += etaS[t]; etaS2av += etaS[t];
+	}
 	xiSav /= ntrial; xiS2av /= ntrial; HSav /= ntrial; etaSav /= ntrial; etaS2av /= ntrial;
 	
 	av1 = 0; av2 = 0; av3 = 0;
@@ -334,14 +417,57 @@ function calc()
 	}
 	Hglob /= ntrial*(NI+f*NS); etaglob /= ntrial*(NI+f*NS); xiglob /= ntrial*(NI+f*NS);
 
+
+	var_xiS = (xiS2av - xiSav*xiSav);
+	var_etaS = (etaS2av - etaSav*etaSav)
+
+	if(newtype == "GWAS" || newtype == "FIELD"){
+		nrep = 1;
+		var p;
+		if(newtype == "GWAS"){
+			ntrial = parseInt(ById("ntrialGWAS").value);
+			p = ById("p").value;
+		}
+		else{
+			ntrial = parseInt(ById("ntrialFIELD").value);
+			p = ById("vacfreq").value;
+		}		
+
+		xiSav = 2*p-1; 
+		var_xiS = 2*p*(1-p)/NS;
+		
+		xiIav = 2*p-1; 
+		var_xiI =  2*p*(1-p)/NI;
+		
+		HIav = 1-2*p*(1-p);
+		HSav = 1-2*p*(1-p);
+		etaIav = 2*p*(1-p);
+		etaSav = 2*p*(1-p);
+		var_etaS = 2*p*(1-p)*(1-2*p*(1-p))/NS;
+		var_etaI = 2*p*(1-p)*(1-2*p*(1-p))/NI;
+		
+		av1 = var_xiS + var_xiI;
+		av2 = -var_xiS;
+		av3 = 0;
+		av1eta = var_etaS + var_etaI;
+		av2eta = -var_etaS;
+		av3eta = 0;
+		
+		Hglob = (HIav*NI + HSav*f*NS)/(NI+f*NS);
+		etaglob = (etaIav*NI + etaSav*f*NS)/(NI+f*NS);
+		xiglob = (xiIav*NI+xiSav*f*NS)/(NI+f*NS);
+		
+		h = NI/(NI+f*NS);
+	}
+			
 	X = (1-h)*av1 - (NI/(f*NS))*Math.log(h)*Math.log(h)*av3*av3;
 	Xeta = (1-h)*av1eta - (NI/(f*NS))*Math.log(h)*Math.log(h)*av3eta*av3eta;
 	W = Math.log(h)*av2;
 	Weta = Math.log(h)*av2eta;
  
   MSS = nrep*ntrial*f*NS*(HSav-xiSav*xiSav);
-	MSI = nrep*ntrial*(f*NS*(xiS2av - xiSav*xiSav) - NI*W);
-	MII = nrep*ntrial*(f*NS*(xiS2av - xiSav*xiSav) - NI*(2*W-X));
+	MSI = nrep*ntrial*(f*NS*var_xiS - NI*W);
+	MII = nrep*ntrial*(f*NS*var_xiS - NI*(2*W-X));
 	num = (MSS*MII-MSI*MSI)/MII;
 
 	
@@ -361,7 +487,7 @@ function calc()
 	else st = (1/Math.sqrt(num)).toFixed(3);
  	ById("dom_g").innerHTML = st+ "/|<i>a<sub>g</sub></i>|";
 
-	num = nrep*ntrial*f*NS*(etaS2av - etaSav*etaSav) + nrep*ntrial*NI*(-2*Weta + Xeta);
+	num = nrep*ntrial*f*NS*var_etaS + nrep*ntrial*NI*(-2*Weta + Xeta);
 	if(num <= 0) st = "?";
 	else st = (1/Math.sqrt(num)).toFixed(3);
  	ById("dom_f").innerHTML = st+ "/|<i>a<sub>f</sub></i>|";
@@ -370,17 +496,18 @@ function calc()
 	if(num <= 0) st = "?";
 	else st = (1/Math.sqrt(num)).toFixed(3);
  	ById("dom_r").innerHTML = st+ "/|<i>a<sub>r</sub></i>|";
-	
+		
+	ById("Nexp").innerHTML = (NI+NS)*ntrial*nrep;
+
 	replot();
 }
 
 function drawcan(nam,t,ty)
 {
 	var typest = "seed"; if(ty == 1) typest = "cont";
-	
+
 	NI = parseInt(ById("nseeder").value);
 	NS = parseInt(ById("ncontact").value);
-
 
 	if(model == "VAC"){
 		
@@ -393,7 +520,7 @@ function drawcan(nam,t,ty)
 	
 			NBB = Math.round(phiBBseedlist[t]*NI);
 			NAA = NI - NBB;
-			
+		
 			xiI[t] = (NBB - NAA)/NI;
 			HI[t] = 1;
 			etaI[t] = 0;
@@ -580,7 +707,12 @@ function replot()
 		
 	ById("output_box").style.left = 300 + ById("wrap").clientWidth+"px";
 	
-	for(t = 0; t < ntrial; t++){ na = triallist[t]; drawcan(na,t,0); drawcan(na,t,1);}	
+	if(newtype != "GWAS" && newtype != "FIELD"){
+		for(var t = 0; t < ntrial; t++){ 
+			na = triallist[t]; 
+			drawcan(na,t,0); drawcan(na,t,1);
+		}	
+	}
 }
 
 function init()
@@ -622,12 +754,14 @@ function changentrial()
 
 function changemodel()
 {
+	butdown = 0;
+
 	model = document.forms["formMOD"]["type"].value;
 
-	if(model == modelold) return;
+	changetype();
 	
-	modelold = model;
-
+	ById('rep_id').style.display = "";
+	
 	if(model == "SNP"){
 		document.forms["formSNP"].style.display = "inline";
 		document.forms["formVAC"].style.display = "none";
@@ -635,7 +769,13 @@ function changemodel()
 		ById("dom_f_show").style.display = "";
 		ById("dom_r_show").style.display = "";
 		ById("dom_show").style.display = "";
-		ById('input_box').style.height = "415px"; 
+		ById('input_box').style.height = "445px"; 
+		if(newtype == "User defined")	ById('input_box').style.height = "465px"; 
+		if(newtype == "GWAS"){
+			ById('input_box').style.height = "475px"; 
+			ById('rep_id').style.display = "none";
+		}
+		
 		ById('output_box').style.height = "230px";
 	}
 	else{
@@ -645,12 +785,16 @@ function changemodel()
 		ById("dom_f_show").style.display = "none";
 		ById("dom_r_show").style.display = "none";
 		ById("dom_show").style.display = "none";
-		ById('input_box').style.height = "335px"; 
+		ById('input_box').style.height = "370px";
+		if(newtype == "User defined") ById('input_box').style.height = "390px"; 
+
+		if(newtype == "FIELD"){
+			ById('input_box').style.height = "400px"; 
+			ById('rep_id').style.display = "none";
+		}
+		
 		ById('output_box').style.height = "143px";
 	}
-	
-	oldtype = null;
-	changetype();
 }
 
 function changetype()
@@ -663,13 +807,24 @@ function changetype()
 	if(newtype == oldtype) return;
 	oldtype = newtype;
 	
-	if(newtype == "User defined"){
-		ById("ntrSNP").style.visibility = "visible";		
-		ById("ntrVAC").style.visibility = "visible";		
+	ById("ntrSNP").style.display = "none";
+	ById("ntrVAC").style.display = "none";
+		
+	if(newtype == "User defined" && model == "SNP") ById("ntrSNP").style.display = "";		
+	if(newtype == "User defined" && model == "VAC") ById("ntrVAC").style.display = "";		
+
+	if(newtype == "GWAS"){
+		ById("ntrGWAS").style.display = "";		
 	}
 	else{
-		ById("ntrSNP").style.visibility = "hidden";
-		ById("ntrVAC").style.visibility = "hidden";
+		ById("ntrGWAS").style.display = "none";		
+	}
+	
+	if(newtype == "FIELD"){
+		ById("ntrFIELD").style.display = "";		
+	}
+	else{
+		ById("ntrFIELD").style.display = "none";		
 	}
 	
 	ById("list").innerHTML = "";
@@ -756,11 +911,26 @@ function changetype()
 		addtrial();
 		phiBBseedlist[0]=0.0; phiABseedlist[0]=0; phiBBcontlist[0]=0; phiABcontlist[0]=0;
 		break;
+		
+	case "GWAS": case "FIELD":
+		ById("wrap").style.width = "0px";
+	
+		ById("nseeder").value = 1;
+		ById("ncontact").value = 19;
+		ById("nrep").value = 1;
+		
+		ById("ntrialGWAS").value = 10;
+		ById("p").value = 0.5;
+		
+		ById("ntrialFIELD").value = 10;
+		ById("vacfreq").value = 0.5;
+		break;
 	}
 	
-		
-	if(model == "SNP") ById("ntrialSNP").value = ntrial;
-	else ById("ntrialVAC").value = ntrial;
+	if(newtype != "GWAS" && newtype != "FIELD"){
+		if(model == "SNP") ById("ntrialSNP").value = ntrial;
+		else ById("ntrialVAC").value = ntrial;
+	}
 	
 	replot();
 	calc();
@@ -877,7 +1047,7 @@ function ById(a){ return  document.getElementById(a);}
 <img src="SIREPClogo.png" height=90 />
 <br/>
 <div style="width:850px; margin-top:10px; margin-bottom:0px;">
-This calculator tool estimates precisions for SNP or vaccination-based effects that alter individual susceptibility, infectivity and/or recoverability using infection and recovery time data from a disease transmission experiment.
+This calculator tool estimates precisions for SNP or vaccination-based effects that alter individual susceptibility, infectivity and/or recoverability using infection and recovery time data from a disease transmission experiment or field data.
 </div>
 <div style="width:850px; margin-top:10px; margin-bottom:0px;">
 For further details please click <a href="javascript:helpon();">here</a> and for parameter definitions  <a href="javascript:paramdefon();">here</a>.
@@ -888,30 +1058,78 @@ For further details please click <a href="javascript:helpon();">here</a> and for
  
  
  
-<div id='input_box' class='boxgreen' style='position:absolute; left:10px; top:185px; width:270px; height:415px; margin:8px; font-size:17px;'>
+<div id='input_box' class='boxgreen' style='position:absolute; left:10px; top:185px; width:270px; height:445px; margin:8px; font-size:17px;'>
 <center><b style='font-size:20px'>INPUTS</b></center>
  <b style='font-size:12px; margin:0px;padding:0px'>EFFECTS:</b> <br>
-	<form name="formMOD" onsubmit="return false" style="margin-top:1px; margin-bottom:8px;" onchange="changemodel();">
+	<form name="formMOD" onsubmit="return false" style="margin-top:1px; margin-bottom:8px;" onchange="oldtype = null; changemodel();">
 	<input type="radio" name="type" value="SNP"> SNP <br>
 	<input type="radio" name="type" value="VAC"> Vaccination <br>
 	</form>
 	
  <b style='font-size:12px; margin:0px; padding:0px'>DESIGN:</b> <br>
  
-<form name="formSNP"  onsubmit="return false" style="margin-top:0px; margin-bottom:8px;" onchange="changetype();">
+<form name="formSNP"  onsubmit="return false" style="margin-top:0px; margin-bottom:8px;" onchange="changemodel();">
  <input type="radio" name="type" value="Single"> Single group (w/o dominance) <br>
  <input type="radio" name="type" value="Pure"> Pure design (w/o dominance)<br>
  <input type="radio" name="type" value="Puredom"> Pure design (with dominance)<br>
  <input type="radio" name="type" value="Mixed" > Mixed design (w/o dominance)<br>
  <input type="radio" name="type" value="Mixeddom" > Mixed design (with dominance) <br>
- <input type="radio" name="type" value="User defined"> User defined <span id="ntrSNP" style="visibility:hidden"> - Groups: <input  type="number" style="width:40px; margin-right:10px" id="ntrialSNP" value="1" step="1" min="1" max="100" onchange="check_input(); changentrial()"></span>
+ <div style="height:4px"></div>
+ <input type="radio" name="type" value="User defined"> User defined  <br>
+ <div id="ntrSNP" style="display:none; margin-left:30px"> # Groups: <input  type="number" style="width:40px; margin-right:10px" id="ntrialSNP" value="1" step="1" min="1" max="1000" onchange="check_input(); changentrial()"></div>
+ 
+  <div style="height:4px"></div>
+ <input type="radio" name="type" value="GWAS"> GWAS / Field data <br>
+	<table id="ntrGWAS" style="display:none;  margin-left:30px">
+<tr>
+<td>
+	# Groups: 
+	</td>
+	<td>
+	<input  type="number" style="width:40px; margin-right:10px" id="ntrialGWAS" value="1" step="1" min="1" max="1000" onchange="check_input(); calc()">
+	</td>
+	</tr>
+	<tr>
+	<td>
+	Allele freq.:
+	</td>
+	<td>
+	<input  type="number" style="width:40px; margin-right:10px" id="p" value="0.5" min="1" max="1" onchange="check_input(); calc()">
+	</td>
+	</tr>
+	</table>	
 </form>
 
-<form name="formVAC"  onsubmit="return false" style="display:none; margin-top:8px; margin-bottom:0px;" onchange="changetype();">
+<form name="formVAC"  onsubmit="return false" style="display:none; margin-top:8px; margin-bottom:0px;" onchange="changemodel();">
  <input type="radio" name="type" value="Single"> Single group<br>
  <input type="radio" name="type" value="Pure"> Pure design<br>
  <input type="radio" name="type" value="Mixed"> Mixed design<br>
- <input type="radio" name="type" value="User defined"> User defined <span id="ntrVAC" style="visibility:hidden"> - Groups: <input  type="number" style="width:40px; margin-right:3px" id="ntrialVAC" value="1" step="1" min="1" max="100" onchange="changentrial()"></span>
+ <div style="height:4px"></div>
+ <input type="radio" name="type" value="User defined"> User defined<br>
+<div style="height:4px"></div>
+ <div id="ntrVAC" style="display:none; margin-left:30px"> # Groups: <input  type="number" style="width:40px; margin-right:10px" id="ntrialVAC" value="1" step="1" min="1" max="1000" onchange="check_input(); changentrial()"></div>
+ 
+<div style="height:4px"></div>
+ <input type="radio" name="type"  value="FIELD"> Field data <br>
+	<table id="ntrFIELD" style="display:none;  margin-left:30px">
+<tr>
+<td>
+	# Groups: 
+	</td>
+	<td>
+	<input  type="number" style="width:40px; margin-right:10px" id="ntrialFIELD" value="1" step="1" min="1" max="1000" onchange="check_input(); calc();">
+	</td>
+	</tr>
+	<tr>
+	<td>
+	Vac. freq.:
+	</td>
+	<td>
+	<input  type="number" style="width:40px; margin-right:10px" id="vacfreq" value="0.5" min="0" max="1" onchange="check_input(); calc();">
+	</td>
+	</tr>
+	</table>	
+ 
 </form>
 
  <b style='font-size:12px; margin:0px;padding:0px'>DETAILS:</b> <br>
@@ -922,8 +1140,8 @@ For further details please click <a href="javascript:helpon();">here</a> and for
 <tr>
 <td style="vertical-align:top"># Contacts per group:</td><td style="vertical-align:top"> <input type="number" style="width:50px; margin-right:30px" id="ncontact" value = 10 step="1" min="1" max="1000" onchange="check_input(); replot(); calc();"></td>
 </tr>
-<tr>
-<td style="vertical-align:top"># Replicates:</td><td style="vertical-align:top"> <input type="number" style="width:50px; margin-right:30px" id="nrep" value = 1 step="1" min="1" max="100" onchange="check_input(); calc();"></td>
+<tr id="rep_id" >
+<td style="vertical-align:top;"># Replicates:</td><td style="vertical-align:top"> <input type="number" style="width:50px; margin-right:30px" id="nrep" value = 1 step="1" min="1" max="100" onchange="check_input(); calc();"></td>
 </tr>
 <tr>
 <td style="vertical-align:top">Shape parameter <i>k</i>:</td><td style="vertical-align:top"> <input type="number" style="width:50px; margin-right:30px" id="kshape" value = 5 step="1" min="1" onchange="check_input(); calc();"></td>
@@ -938,7 +1156,7 @@ For further details please click <a href="javascript:helpon();">here</a> and for
 </div>
 
 <div id="output_box" class='boxred' style='position:absolute; left:610px; top:185px; width:270px; height:230px; margin:8px; font-size:17px;'>
-<center><b style='font-size:20px, font-family:Arial'>OUTPUTS</b></center>
+<center><b style='font-size:20px'>OUTPUTS</b></center>
 <table>
 <tr><td width = 150><i style="font-family:Arial">N<sub>total</sub></i> = <span id="Nexp"></span></td><td width = 110>Individuals</td></tr>
 <tr><td style="vertical-align:top">SD in <i>a<sub>g</sub></i> = <span id="sig_g"></span></td><td style="vertical-align:top">(Susceptibility)</td></tr>
@@ -977,11 +1195,11 @@ For further details please click <a href="javascript:helpon();">here</a> and for
 <div class="inside" style="overflow:scroll; height:85%; margin-top:10px">
 
 <h2>What are SNP and vaccination effects? </h2>
-<p> Vaccinations are known to be an effective way to reduce the probability of becoming infected, however they will not protect every individual. Furthermore, once infected a vaccinated individual may be less likely to transmit the disease and/or recover faster. Understanding these mechanisms is crucial to estimating the effectiveness of a vaccination campaign. We define vaccination "effects" as the average difference in three key epidemiological traits between the vaccinated and unvaccinated groups: susceptibility, infectivity and recoverability.
+<p> Vaccination is known to be an effective way to reduce the probability of becoming infected, however they will not protect every individual. Furthermore, once infected a vaccinated individual may be less likely to transmit the disease and/or recover faster. Understanding these mechanisms is crucial to estimating the effectiveness of a vaccination campaign. We define vaccination "effects" as the average difference in three key epidemiological traits between the vaccinated and unvaccinated groups: susceptibility, infectivity and recoverability.
 </p>
 
 <p>
- Single nucleotide polymorphisms (SNP) capture individual variability at a particular genetic nucleotide. Some SNPs have been discovered that have large "effects" on the three host epidemiological traits. Targeting these SNPs in selective breeding programmes offers a potential avenue for effective disease control. Here it is assumed that the SNP under consideration takes two possible alleles (<i>A</i> and <i>B</i>), and that individuals are diploid (i.e. they have genotypes <i>AA</i>, <i>AB</i> or <i>BB</i>).
+ Single nucleotide polymorphisms (SNP) capture individual variability at a particular genetic nucleotide. Some SNPs have been discovered that have large "effects" on the three host epidemiological traits. Targeting these SNPs in selective breeding programmes offers a potential avenue for effective disease control. Here it is assumed that the SNP under consideration takes two possible alleles (<i>A</i> and <i>B</i>), and that individuals are diploid (<i>i.e.</i> they have genotypes <i>AA</i>, <i>AB</i> or <i>BB</i>).
 </p>
 
 <p>
@@ -990,7 +1208,7 @@ For further details please click <a href="javascript:helpon();">here</a> and for
 
 <h2> What is the purpose of <i>SIRE-PC</i>?</h2>
 <p>
-We begin by assuming that a disease transmission experiment is going to be undertaken to establish how a particular SNP (or vaccination status) affects the three host traits: susceptibility, infectivity and recoverability. 
+We begin by assuming that a disease transmission experiment is going to be undertaken (or field data is being analysed) to establish how a particular SNP (or vaccination status) affects the three host traits: susceptibility, infectivity and recoverability. 
 </p>
 <p>Existing computational tools (such as <a href="https://theiteam.github.io/SIRE.html">SIRE</a>) make it possible to estimate variation in these traits using the infection and recovery times of individuals in the experiment (or alternatively just recovery times or disease diagnostic test results, although these lead to an additional loss in statistical power not considered here).
 </p>
@@ -1021,11 +1239,15 @@ A key question to ask is how should the experiment be best designed in order to 
  Selecting "User defined" allows the user to set an arbitrary design. Here the number of groups can be altered by entering the relevant number in the box (also groups can be removed by clicking on the "x" symbols in the corner).
 </p>
 
+<p>
+ Selecting "GWAS / Field data" gives results for the case in which the SNP allele under study is assumed to be randomly distributed across groups. Here the number of groups can be specified by entering the relevant number in the box. The genotypes of individuals (both seeders and contacts) are assumed to be in Hardy-Weinberg equilibrium with a specified <i>A</i> allele frequency (note, in the case of field data the number of seeders is usually set to one to represent the index case). 
+</p>
+
  <p>The number of seeders and contacts refers to the number of individuals initially infected and susceptible in each contact group. The genetic compositions of these subpopulations is shown by the panels on the right (one for each contact group). Here <i>N<sub>AA</sub></i>, <i>N<sub>BB</sub></i> and <i>N<sub>AB</sub></i> refer to the number of individuals in each of the three genotypes. These genetic compositions may be changed by either clicking on the numbers themselves, or by dragging the purple circles within the triangle plots.  
  </p>
  
  <p>
-Often the same basic design is repeated multiple times as a way of increasing statistical power. This duplication is represented by the number of "replicates".
+Often the same basic experimental design is repeated multiple times as a way of increasing statistical power. This duplication is represented by the number of "replicates".
  </p>
  
  <p>
@@ -1040,13 +1262,18 @@ Often the same basic design is repeated multiple times as a way of increasing st
  
 <h3>Outputs</h3>
 <p>
-The first number shows the total number of individuals for the experiment. 
+<span style="font-family:arial"><i>N</i><sub>total</sub></span> shows the total number of individuals for the experiment. 
 </p>
 <p>
-Model parameters <i>a<sub>g</sub></i>, <i>a<sub>f</sub></i>, and <i>a<sub>r</sub></i> represent the relative differences in susceptibility, infectivity and recovery rate for individuals with an <i>A</i> compared to a <i>B</i> allele at the SNP under investigation. For example, <i>a<sub>g</sub></i>=0.1 represents the case in which individuals with genotype <i>AA</i> are approximately 20% more susceptible to disease than those with <i>BB</i> (see paper for a more precise definition).
+Model parameters <i>a<sub>g</sub></i>, <i>a<sub>f</sub></i>, and <i>a<sub>r</sub></i> represent the relative fractional differences in susceptibility, infectivity and recovery rate for individuals with an <i>A</i> compared to a <i>B</i> allele at the SNP under investigation. For example, <i>a<sub>g</sub></i>=0.1 represents the case in which individuals with genotype <i>AA</i> are approximately 20% more susceptible to disease than those with <i>BB</i> (see paper for a more precise definition).
 </p>
 <p>
-Due to the stochastic nature of data obtained from disease transmission experiments (<i>i.e.</i> infection and recovery times), precise estimates for <i>a<sub>g</sub></i>, <i>a<sub>f</sub></i>, and <i>a<sub>r</sub></i> are not possible. What this tool shows is the expected standard deviation in the posterior distribution of these quantities, which provide estimates for their precision. Small numbers represent a higher degree of precision, and so the experimental design should be chosen to minimise these standard deviations as much as possible.
+Due to the stochastic nature of data obtained from disease transmission experiments (<i>i.e.</i> infection and recovery times), precise estimates for <i>a<sub>g</sub></i>, <i>a<sub>f</sub></i>, and <i>a<sub>r</sub></i> are not possible. What this tool shows is the expected standard deviation in the posterior distribution of these quantities, which provide estimates for their precision. Small numbers represent a higher degree of precision, and so the experimental design should be chosen to minimise these standard deviations as much as possible. A question mark ? is used to represent the case in which the standard deviation is infinite (<i>i.e.</i> no information is available).
+</p>
+
+<p>
+One way of interpreting the standard deviations is that they provides a guide as to how small an effect the experiment is able to detect. For example a value "SD in <i>a<sub>g</sub></i> = 0.2" would mean that statistically significant association can be made in cases in which the <i>AA</i> and <i>BB</i> (or alternatively vaccinated/unvaccinated) individuals differ in their susceptibility by 20% or more. The experiment would likely lack the power to identify smaller effect sizes than this. 
+Note this is only a general guide and the actual statistical power depends on stochastic variability inherent in the epidemiological process itself. Furthermore when performing GWAS, power is substantially reduced because of the large number of tests being carried out (<i>e.g.</i> through Bonferroni correction).  
 </p>
 
 <p>
@@ -1057,6 +1284,10 @@ Parameters &Delta;<i><sub>g</sub></i>, &Delta;<i><sub>f</sub></i>, and &Delta;<i
 <p>
 The key difference between studying vaccination effects and SNP effects is that instead of three genotypes (<i>AA</i>, <i>AB</i> and <i>BB</i>) we have two classifications: unvaccinated and vaccinated. Effectively this means we can associated unvaccinated individuals to be represented by <i>AA</i>, vaccinated by <i>BB</i> and set the number of <i>AB</i> individuals to zero. 
 This also means that dominance does not need to be considered, and so experimental designs aimed at estimating this are omitted (along with the input slider giving the expected dominance of <i>A</i> over <i>B</i>). Furthermore, instead of triangular plots we now simply use sliders to control the vaccination status composition for the seeder and contact populations within each group.
+</p>
+
+<p>
+When the "field data" option is selected it is assumed that individuals are independently vaccinated with a certain specified frequency (resulting in a stochastic variation in vaccination levels across groups). If vaccination levels are actually known for each of the groups this data can be incorporated by selecting the "user defined" option.
 </p>
 
 <h3>General application</h3>
@@ -1084,6 +1315,8 @@ Two important points need to be made when considering the general application of
 
 <table style="vertical-align:top">
 <tr><td style="vertical-align:top"><b>SNP</b></td><td width=30></td><td style="vertical-align:top">Single nucleotide polymorphism</td></tr>
+<tr style="height:5px"></tr>
+<tr><td style="vertical-align:top"><b>GWAS</b></td><td width=30></td><td style="vertical-align:top">Genome-wide association study</td></tr>
 <tr style="height:5px"></tr>
 <tr><td style="vertical-align:top"><b>Seeder</b></td><td width=30></td><td style="vertical-align:top">Initially infected individual</td></tr>
 <tr style="height:5px"></tr>
@@ -1142,23 +1375,27 @@ Two important points need to be made when considering the general application of
 <tr><td style="vertical-align:top"><b style="font-family:times">Δ<sub>r</sub></b></td><td width=30></td><td style="vertical-align:top">Recoverability effect scaled dominance factor (1 = <i>A</i> is completely dominant over <i>B</i>, -1 = <i>B</i> is dominant over <i>A</i>, 0 = no dominance)</td></tr>
 
 <tr style="height:5px"></tr>
-<tr><td style="vertical-align:top"><b style="font-family:times">SD in <i>Δ<sub>g</sub></i></b></td><td width=30></td><td style="vertical-align:top">Expected standard deviation in the posterior distribution for <i>Δ<sub>g</sub></i></td></tr>
+<tr><td style="vertical-align:top"><b style="font-family:times">SD in Δ<i><sub>g</sub></i></b></td><td width=30></td><td style="vertical-align:top">Expected standard deviation in the posterior distribution for Δ<i><sub>g</sub></i></td></tr>
 
 <tr style="height:5px"></tr>
-<tr><td style="vertical-align:top"><b style="font-family:times">SD in <i>Δ<sub>f</sub></i></b></td><td width=30></td><td style="vertical-align:top">Expected standard deviation in the posterior distribution for <i>Δ<sub>f</sub></i></td></tr>
+<tr><td style="vertical-align:top"><b style="font-family:times">SD in Δ<i><sub>f</sub></i></b></td><td width=30></td><td style="vertical-align:top">Expected standard deviation in the posterior distribution for Δ<i><sub>f</sub></i></td></tr>
 
 <tr style="height:5px"></tr>
-<tr><td style="vertical-align:top"><b style="font-family:times">SD in <i>Δ<sub>r</sub></i></b></td><td width=30></td><td style="vertical-align:top">Expected standard deviation in the posterior distribution for <i>Δ<sub>r</sub></i></td></tr>
+<tr><td style="vertical-align:top"><b style="font-family:times">SD in Δ<i><sub>r</sub></i></b></td><td width=30></td><td style="vertical-align:top">Expected standard deviation in the posterior distribution for Δ<i><sub>r</sub></i></td></tr>
 
 
 </table>
 <p>
-<b>Interpretation </b> - Quantities giving standard deviations in effect sizes (i.e. SD in <i>a<sub>g</sub></i> /  <i>a<sub>f</sub></i> /  <i>a<sub>r</sub></i>) provide an indication of what size of effect could potentially be identified by the transmission experiment. For example a value "SD in <i>a<sub>g</sub></i>  = 0.2" would mean that statistically significant association can be made in cases in which the <i>AA</i> and <i>BB</i> (or alternatively vaccinated/unvaccinated) individuals differ in their susceptibility by 20% or more. The experiment would likely lack the power to identify smaller effect sizes than this. (Note, this only provides a general guide and the actual statistical power actually depends on stochastic variability inherent in the epidemiological process itself).  
+<h2>Interpretation </h2>
+<p>
+Quantities giving standard deviations in effect sizes (<i>i.e.</i> SD in <i>a<sub>g</sub></i> /  <i>a<sub>f</sub></i> /  <i>a<sub>r</sub></i>) provide an indication of what size of effect could potentially be identified by a transmission experiment. For example a value "SD in <i>a<sub>g</sub></i> = 0.2" would mean that statistically significant association can be made in cases in which the <i>AA</i> and <i>BB</i> (or alternatively vaccinated/unvaccinated) individuals differ in their susceptibility by 20% or more. The experiment would likely lack the power to identify smaller effect sizes than this. 
+</p>
+<p>
+Note, this tool only provides a general guide and the actual statistical power depends on stochastic variability inherent in the epidemiological process itself. Furthermore, when performing GWAS power is substantially reduced because of the large number of tests being carried out (<i>e.g.</i> through Bonferroni correction).   
 </p> 
  <input class="br" id="number" type="button" value="OK" onclick="paramdefoff();"" style="width:100px;"/>
 
 </div>
-
 
 </body>
 </html>
